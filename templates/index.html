@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Take your notes here</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <style>
+      .important-note {
+        border-left: 4px solid #ffc107;
+        background-color: #fffdf6;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Notes App</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="#">Home</a>
+            </li>
+          </ul>
+          <form class="d-flex" role="search">
+            <input class="form-control me-2" type="search" placeholder="Search notes..." aria-label="Search"/>
+            <button class="btn btn-outline-success" type="submit">Search</button>
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="mb-4">Start adding your notes to the database</h1>
+        <form method="post" action="/" class="bg-light p-4 rounded">
+          <div class="mb-3">
+            <label for="title" class="form-label">Note Title</label>
+            <input type="text" class="form-control" id="title" name="title" placeholder="Enter note title" required>
+          </div>
+          <div class="mb-3">
+            <label for="desc" class="form-label">Note Description</label>
+            <textarea class="form-control" id="desc" name="desc" rows="3" placeholder="Enter note description" required></textarea>
+          </div>
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="important" name="important" value="true">
+            <label class="form-check-label" for="important">Mark as Important</label>
+          </div>
+          <button type="submit" class="btn btn-primary">Add Note</button>
+        </form>
+    </div>
+
+    <div class="container mt-5">
+      <h1 class="mb-4">Your Notes</h1>
+      {% if newDocs %}
+      <div class="row">
+        {% for item in newDocs %}
+        <div class="col-md-6 col-lg-4 mb-3">
+          <div class="card h-100 {% if item.important %}important-note{% endif %}">
+            <div class="card-body">
+              <h5 class="card-title">{{ item.title }}</h5>
+              <p class="card-text">{{ item.desc }}</p>
+              {% if item.important %}
+              <span class="badge bg-warning text-dark">Important</span>
+              {% endif %}
+            </div>
+            <div class="card-footer">
+              <small class="text-muted">ID: {{ item.id[:8] }}...</small>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="alert alert-info" role="alert">
+        No notes found. Add your first note above!
+      </div>
+      {% endif %}
+    </div>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script>
+// Search functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const searchForm = document.querySelector('form[role="search"]');
+  const searchInput = searchForm.querySelector('input[type="search"]');
+  const noteCards = document.querySelectorAll('.col-md-6.col-lg-4');
+  
+  function performSearch() {
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    let resultsFound = false;
+    
+    noteCards.forEach(card => {
+      const title = card.querySelector('.card-title').textContent.toLowerCase();
+      const desc = card.querySelector('.card-text').textContent.toLowerCase();
+      const cardText = title + ' ' + desc;
+      
+      if (cardText.includes(searchTerm)) {
+        card.style.display = 'block';
+        resultsFound = true;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+    
+    // Show message if no results
+    const resultsContainer = document.querySelector('.container.mt-5');
+    let noResultsMsg = resultsContainer.querySelector('.no-results');
+    
+    if (!resultsFound && searchTerm) {
+      if (!noResultsMsg) {
+        noResultsMsg = document.createElement('div');
+        noResultsMsg.className = 'alert alert-warning no-results';
+        noResultsMsg.textContent = `No notes found for "${searchTerm}"`;
+        resultsContainer.querySelector('.row').after(noResultsMsg);
+      }
+    } else if (noResultsMsg) {
+      noResultsMsg.remove();
+    }
+  }
+  
+  searchForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    performSearch();
+  });
+  
+  searchInput.addEventListener('input', function() {
+    if (this.value === '') {
+      // Show all cards when search is cleared
+      noteCards.forEach(card => {
+        card.style.display = 'block';
+      });
+      const noResultsMsg = document.querySelector('.no-results');
+      if (noResultsMsg) noResultsMsg.remove();
+    } else {
+      performSearch();
+    }
+  });
+});
+</script>
+  </body>
+</html>
